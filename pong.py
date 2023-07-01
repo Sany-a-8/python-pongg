@@ -1,82 +1,63 @@
-import pygame
-import random
+from pygame import *
+back=(255,200,100)
+width=700
+height=500
+class GameSprite(sprite.Sprite):
+    #конструктор класу
+    def __init__(self, player_image, player_x, player_y, player_speed, wight, height):
+        super().__init__()
+        self.image = transform.scale(image.load(player_image), (wight, height)) #разом 55,55 - параметри
+        self.speed = player_speed
+        self.rect = self.image.get_rect()
+        self.rect.x = player_x
+        self.rect.y = player_y
+    def reset(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+class Player(GameSprite):
+    def update_r(self):
+        keys = key.get_pressed()
+        if keys[K_UP] and self.rect.y > 5:
+            self.rect.y -= self.speed
+        if keys[K_DOWN] and self.rect.y <height - 80:
+            self.rect.y += self.speed
+    def update_l(self):
+        keys = key.get_pressed()
+        if keys[K_w] and self.rect.y > 5:
+            self.rect.y -= self.speed
+        if keys[K_s] and self.rect.y < height - 80:
+            self.rect.y += self.speed
+window=display.set_mode((width,height))
+window.fill(back)
 
-# Initialize Pygame
-pygame.init()
 
-# Set up the window
-width = 600
-height = 600
-window = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Pong")
+clock=time.Clock()
+ball = GameSprite('tenis_ball.png', 200, 200, 4, 50, 50)
+racket1=Player('racket.png', 30, 200, 4, 50, 150)
+racket2=Player('racket.png', 520, 200, 4, 50, 150)
 
-# Set up colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+game_over=False
 
-# Set up paddles
-paddle_width = 10
-paddle_height = 60
-paddle_speed = 5
-paddle1_x = 10
-paddle1_y = height // 2 - paddle_height // 2
-paddle2_x = width - paddle_width - 10
-paddle2_y = height // 2 - paddle_height // 2
+speed_x=3
+speed_y=3
 
-# Set up ball
-ball_radius = 8
-ball_x = width // 2
-ball_y = height // 2
-ball_speed_x = random.choice([-2, 2])
-ball_speed_y = random.choice([-2, 2])
+while not game_over:
+    for e in event.get():
+        if e.type==QUIT:
+            game_over=True
+            
+    if game_over!=True:
+        ball.rect.x+=speed_x
+        ball.rect.y+=speed_y
+    
+    if ball.rect.y>width-50 or ball.rect.y<0:
+        speed_y*-=1
+        
+    if sprite.collide_rect(racket1,ball) or sprite.collide_rect(racket2,ball):
+        speed_y*-=1
+        
+    
+    
 
-# Set up game clock
-clock = pygame.time.Clock()
-
-# Game loop
-running = True
-while running:
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # Paddle movement
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w] and paddle1_y > 0:
-        paddle1_y -= paddle_speed
-    if keys[pygame.K_s] and paddle1_y < height - paddle_height:
-        paddle1_y += paddle_speed
-    if keys[pygame.K_UP] and paddle2_y > 0:
-        paddle2_y -= paddle_speed
-    if keys[pygame.K_DOWN] and paddle2_y < height - paddle_height:
-        paddle2_y += paddle_speed
-
-    # Ball movement
-    ball_x += ball_speed_x
-    ball_y += ball_speed_y
-
-    # Ball collision with paddles
-    if ball_x <= paddle1_x + paddle_width and paddle1_y <= ball_y <= paddle1_y + paddle_height:
-        ball_speed_x = abs(ball_speed_x)
-    elif ball_x >= paddle2_x - ball_radius and paddle2_y <= ball_y <= paddle2_y + paddle_height:
-        ball_speed_x = -abs(ball_speed_x)
-
-    # Ball collision with walls
-    if ball_y <= 0 or ball_y >= height - ball_radius:
-        ball_speed_y = -ball_speed_y
-
-    # Drawing
-    window.fill(BLACK)
-    pygame.draw.rect(window, WHITE, (paddle1_x, paddle1_y, paddle_width, paddle_height))
-    pygame.draw.rect(window, WHITE, (paddle2_x, paddle2_y, paddle_width, paddle_height))
-    pygame.draw.circle(window, WHITE, (ball_x, ball_y), ball_radius)
-
-    # Update display
-    pygame.display.flip()
-
-    # Set the game's FPS
-    clock.tick(60)
-
-# Quit the game
-pygame.quit()
+    ball.reset()
+    display.update()
+    clock.tick(40)
