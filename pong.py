@@ -1,63 +1,65 @@
-from pygame import *
-back=(255,200,100)
-width=700
-height=500
+from pygame import*
+
+
 class GameSprite(sprite.Sprite):
-    #конструктор класу
-    def __init__(self, player_image, player_x, player_y, player_speed, wight, height):
+    def __init__(self,player_image,player_x,player_y,player_speed,width,height):
         super().__init__()
-        self.image = transform.scale(image.load(player_image), (wight, height)) #разом 55,55 - параметри
-        self.speed = player_speed
-        self.rect = self.image.get_rect()
-        self.rect.x = player_x
-        self.rect.y = player_y
+        self.image=tranform.scale(image.load(player_image),(width,height))
+        self.rect=self.image.get_rect()
+        self.x=player_x
+        self.y=player_y
+        self.speed=player_speed
     def reset(self):
-        window.blit(self.image, (self.rect.x, self.rect.y))
+        mw.blit(self.image,(self.rect.x,self.rect.y))
+
 class Player(GameSprite):
     def update_r(self):
-        keys = key.get_pressed()
-        if keys[K_UP] and self.rect.y > 5:
-            self.rect.y -= self.speed
-        if keys[K_DOWN] and self.rect.y <height - 80:
-            self.rect.y += self.speed
+        key=key.get_pressed()
+        if key[K_UP] and self.rect.y<0:
+            self.rect.y-=self.speed
+        if key[K_DOWN] and self.rect.y>widht-80:
+            self.rect.y+=self.speed
     def update_l(self):
-        keys = key.get_pressed()
-        if keys[K_w] and self.rect.y > 5:
-            self.rect.y -= self.speed
-        if keys[K_s] and self.rect.y < height - 80:
-            self.rect.y += self.speed
-window=display.set_mode((width,height))
-window.fill(back)
+        key=key.get_pressed()
+        if key[K_w] and self.rect.y<0:
+            self.rect.y-=self.speed
+        if key[K_s] and self.rect.y>widht-80:
+            self.rect.y+=self.speed
+    
+            
+racket1=Player("racket.png",50,200,4,50,150)
+racket2=Player("racket.png",350,200,4,50,150)
+        
 
+width=600
+height=600
+
+mw=display.set_mode((width,height))
+mw.fill((100,100,255))
+display.set_caption("Пінг Понг")
 
 clock=time.Clock()
-ball = GameSprite('tenis_ball.png', 200, 200, 4, 50, 50)
-racket1=Player('racket.png', 30, 200, 4, 50, 150)
-racket2=Player('racket.png', 520, 200, 4, 50, 150)
 
-game_over=False
+game=True
+finish=False
+FPS=60
 
 speed_x=3
 speed_y=3
 
-while not game_over:
+while game:
     for e in event.get():
         if e.type==QUIT:
-            game_over=True
-            
-    if game_over!=True:
+            game=False
+
+    if finish!=True:
         ball.rect.x+=speed_x
         ball.rect.y+=speed_y
-    
-    if ball.rect.y>width-50 or ball.rect.y<0:
-        speed_y*-=1
         
-    if sprite.collide_rect(racket1,ball) or sprite.collide_rect(racket2,ball):
-        speed_y*-=1
-        
-    
-    
+    ball.update()
 
-    ball.reset()
+    if ball.rect.y>width-50 or ball.rect.y<0:
+        speed_y*=-1
+
     display.update()
-    clock.tick(40)
+    clock.tick(FPS)
